@@ -368,6 +368,7 @@ cmd_import() {
 	                        hkp://keyserver.ubuntu.com:80 \
 	                        pgp.mit.edu ) ;
 	do
+		# shellcheck disable=SC2046
 		gpg \
 			--keyserver "$server" \
 			--recv-keys $(xargs echo < .gitsigners) && { break || : ; }
