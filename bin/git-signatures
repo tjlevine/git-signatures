@@ -306,7 +306,7 @@ cmd_add() {
 	}
 
 	sig_subject "$base" \
-	| gpg --armor --detach-sign --local-user "$key" \
+	| gpg --detach-sign --local-user "$key" \
 	| openssl base64 -A \
 	| git notes --ref signatures append --file=-
 
