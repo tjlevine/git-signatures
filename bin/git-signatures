@@ -298,6 +298,7 @@ cmd_add() {
 		--) shift; break ;;
 	esac done
 	[ "$#" -gt 3 ] && usage add && exit 1
+	[[ "$(git rev-parse --abbrev-ref HEAD)" == "master" ]] && echo "error: cannot create signatures directly on master" && exit 1
 	ref=${1:-HEAD}
 	base=${2:-master}
 	key=${key_id:-$(git config user.signingKey)}
