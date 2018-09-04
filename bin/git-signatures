@@ -404,13 +404,13 @@ cmd_import() {
 
 cmd_pull() {
 	[ "$#" -eq 0 ] || { usage pull; exit 1; }
-	git fetch origin refs/notes/signatures:refs/notes/origin/signatures "refs/tags/$SIGNATURE_TAG:refs/tags/origin/$SIGNATURE_TAG"
+	git fetch origin refs/notes/signatures:refs/notes/origin/signatures "+refs/tags/$SIGNATURE_TAG:refs/tags/origin/$SIGNATURE_TAG"
 	git notes --ref signatures merge -s cat_sort_uniq origin/signatures
 }
 
 cmd_push() {
 	[ "$#" -eq 0 ] || { usage push; exit 1; }
-	git push origin refs/notes/signatures "refs/tags/$SIGNATURE_TAG"
+	git push origin refs/notes/signatures "+refs/tags/$SIGNATURE_TAG"
 }
 
 main "$@"
