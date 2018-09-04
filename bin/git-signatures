@@ -225,7 +225,8 @@ epoch_to_human() {
 
 sig_subject() {
 	local base="${1:-master}"
-	git diff-tree -p $(git merge-base "$base" HEAD)..HEAD \
+
+	git diff-tree -p "$(git merge-base "$base" HEAD)"..HEAD \
 	| git patch-id --stable \
 	| cut -d\  -f1
 }
@@ -268,7 +269,7 @@ sig_parse(){
 sig_decode() {
 	local sig="$1"
 	local base="$2"
-	gpg --verify --verbose --trustdb-name="$trust_db" --status-fd=1 \
+	gpg --verify --trustdb-name="$trust_db" --status-fd=1 \
 	<(printf '%s' "$sig" | openssl base64 -d -A) \
 	<(sig_subject "$base") 2>/dev/null
 }
@@ -297,8 +298,8 @@ cmd_add() {
 		-p|--push) push=1; shift ;;
 		--) shift; break ;;
 	esac done
-	[ "$#" -gt 3 ] && usage add && exit 1
-	[[ "$(git rev-parse --abbrev-ref HEAD)" == "master" ]] && echo "error: cannot create signatures directly on master" && exit 1
+	[ "$#" -gt 2 ] && usage add && exit 1
+
 	ref=${1:-HEAD}
 	base=${2:-master}
 	key=${key_id:-$(git config user.signingKey)}
@@ -306,12 +307,15 @@ cmd_add() {
 		error "invalid_private_key" "$key"; exit 1;
 	}
 
+	# check for HEAD equal to base
+	[ "$(git rev-parse "$base")" == "$(git rev-parse HEAD)" ] && echo "error: cannot sign empty diff" && exit 1
+
 	sig_subject "$base" \
 	| gpg --detach-sign --local-user "$key" \
 	| openssl base64 -A \
 	| git notes --ref signatures append --file=-
 
-	git tag -f "$SIGNATURE_TAG" $(git rev-parse refs/notes/signatures)
+	git tag -f "$SIGNATURE_TAG" "$(git rev-parse refs/notes/signatures)"
 
 	[[ "$push" -eq "0" ]] || $PROGRAM push
 }
